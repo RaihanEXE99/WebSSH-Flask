@@ -1,0 +1,138 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Web Terminal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <style>
+    html {
+      background-color: black;
+      font-family: arial;
+    }
+    body{
+      background-color: black;
+    }
+    .status{
+      background-color: #000;
+      font-weight: bold;
+      border-radius: 10px;
+      color: white;
+      padding: 5px;
+      margin-left: 1.5vw;
+    }
+    
+    header.terminal{background:#1c1d26;height:30px;border-radius:8px 8px 0 0;padding-left:25px;padding-bottom: 50px;padding-top: 10px;}
+    .terminal-container header .button{width:12px;height:12px;margin:10px 4px 0 0;display:inline-block;border-radius:100px;}
+    
+    .green{background-color: #3BB662 !important;padding: 8px;}
+    .red{background-color: #E75448 !important;padding: 8px;}
+    .yellow{background-color: #E5C30F !important;padding: 8px;}
+
+    .terminal-container{text-align:left;width:100%;border-radius:10px;margin:auto;position:relative;}
+    .terminal-fixed-top{margin-top: 30px;}
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/xterm@3.6.0/dist/xterm.css" />
+</head>
+
+
+<body>
+  <!-- <span style="font-size: small;">status: <span style="font-size: small;" id="status">connecting...</span></span> -->
+
+  <div class="d-flex justify-content-center mt-4">
+    <div style="width: 60vw;">
+      <div class="d-flex justify-content-end">
+        <button id="status" class="btn btn-danger">connecting...</button>
+      </div>
+      <section class="terminal-container terminal-fixed-top">
+        <header class="terminal">
+          <span class="button red"></span>
+          <span class="button yellow"></span>
+          <span class="button green"></span>
+        </header>
+      </section>
+      <div style="background-color: #282A36;padding: 20px;">
+        <div id="terminal"></div>
+      </div>
+    </div>
+  </div>
+</body>
+
+<!-- xterm -->
+<!-- <script src="/static/js/xterm.js"></script> -->
+<script src="https://unpkg.com/xterm@3.6.0/dist/xterm.js"></script>
+<script src="https://unpkg.com/xterm@3.6.0/dist/addons/fit/fit.js"></script>
+<script src="https://unpkg.com/xterm@3.6.0/dist/addons/webLinks/webLinks.js"></script>
+<script src="https://unpkg.com/xterm@3.6.0/dist/addons/fullscreen/fullscreen.js"></script>
+<script src="https://unpkg.com/xterm@3.6.0/dist/addons/search/search.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+
+<script>
+  Terminal.applyAddon(fullscreen)
+  Terminal.applyAddon(fit)
+  Terminal.applyAddon(webLinks)
+  Terminal.applyAddon(search)
+  const term = new Terminal({
+        cursorBlink: 5,
+        macOptionIsMeta: true,
+        scrollback: 300,
+        theme: {
+          background: '#282A36'
+        }
+    });
+  term.open(document.getElementById('terminal'));
+  term.fit()
+  term.resize(0,30)
+  console.log(`size: ${term.cols} columns, ${term.rows} rows`)
+  // term.toggleFullScreen(true)
+  term.fit()
+  term.on('key', (key, ev) => {
+    console.log("pressed key", key)
+    console.log("event", ev)
+    socket.emit("pty-input", {"input": key}, function(response) {
+    console.log(response);
+    });
+  });
+
+  
+  
+
+  const socket = io.connect('/pty');
+  const status = document.getElementById("status")
+
+  socket.on("pty-output", function(data){
+    console.log("new output", data)
+    term.write(data.output)
+  })
+
+  socket.on("connect", () => {
+    fitToscreen()
+    status.innerHTML = 'Connected'
+    }
+  )
+
+  socket.on("disconnect", () => {
+    status.innerHTML = 'Disconnected'
+  })
+
+  function fitToscreen(){
+    term.fit()
+    socket.emit("resize", {"cols": term.cols, "rows": term.rows})
+  }
+
+  function debounce(func, wait_ms) {
+    let timeout
+    return function(...args) {
+      const context = this
+      clearTimeout(timeout)
+      timeout = setTimeout(() => func.apply(context, args), wait_ms)
+    }
+  }
+
+  const wait_ms = 50;
+  window.onresize = debounce(fitToscreen, wait_ms)
+
+
+</script>
+
+</body>
+</html>
