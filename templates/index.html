@@ -6,11 +6,11 @@
 
   <style>
     html {
-      background-color: black;
+      background-color: #282B3C;
       font-family: arial;
     }
     body{
-      background-color: black;
+      background-color: #282B3C;
     }
     .status{
       background-color: #000;
@@ -36,12 +36,27 @@
 
 
 <body>
-  <!-- <span style="font-size: small;">status: <span style="font-size: small;" id="status">connecting...</span></span> -->
+  <!-- <div class="d-flex justify-content-center align-items-center">
+    <svg style="color: white;" xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-terminal-fill" viewBox="0 0 16 16">
+      <path d="M0 3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3zm9.5 5.5h-3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zm-6.354-.354a.5.5 0 1 0 .708.708l2-2a.5.5 0 0 0 0-.708l-2-2a.5.5 0 1 0-.708.708L4.793 6.5 3.146 8.146z"/>
+    </svg>
+    <span class="display-4 text-white" style="font-weight: bolder;">
+      SYS-Console
+    </span>
+  </div> -->
 
   <div class="d-flex justify-content-center mt-4">
     <div style="width: 60vw;">
       <div class="d-flex justify-content-end">
-        <button id="status" class="btn btn-danger">connecting...</button>
+        <button onclick="window.location.reload(false)" class="btn btn-danger mx-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/>
+            <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/>
+          </svg>
+        </button>
+        <div id="status">
+          <button class="btn btn-warning">Connecting...</button>
+        </div>
       </div>
       <section class="terminal-container terminal-fixed-top">
         <header class="terminal">
@@ -58,8 +73,8 @@
 </body>
 
 <!-- xterm -->
-<!-- <script src="/static/js/xterm.js"></script> -->
-<script src="https://unpkg.com/xterm@3.6.0/dist/xterm.js"></script>
+<script src="/static/js/xterm.js"></script>
+<!-- <script src="https://unpkg.com/xterm@3.6.0/dist/xterm.js"></script> -->
 <script src="https://unpkg.com/xterm@3.6.0/dist/addons/fit/fit.js"></script>
 <script src="https://unpkg.com/xterm@3.6.0/dist/addons/webLinks/webLinks.js"></script>
 <script src="https://unpkg.com/xterm@3.6.0/dist/addons/fullscreen/fullscreen.js"></script>
@@ -106,12 +121,26 @@
 
   socket.on("connect", () => {
     fitToscreen()
-    status.innerHTML = 'Connected'
+    status.innerHTML = `
+    <button class="btn btn-dark">
+      <svg style="margin-right:5px" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+      </svg>
+      Connected
+    </button>
+    `
     }
   )
 
   socket.on("disconnect", () => {
-    status.innerHTML = 'Disconnected'
+    status.innerHTML = `
+    <button class="btn btn-danger">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+        <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
+      </svg>
+      Disconnected
+    </button>
+    `
   })
 
   function fitToscreen(){
